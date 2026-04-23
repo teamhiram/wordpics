@@ -29,11 +29,27 @@
     state.csrf = me.csrf;
     $("#adminPanel").hidden = false;
 
+    await syncOfficialFromJson();
     bindTabs();
     bindChipGroups();
     bindEditModal();
     await loadSubs();
     await loadReports(); // load counts only
+  }
+
+  async function syncOfficialFromJson() {
+    try {
+      const res = await fetch("/api/admin/sync_official_from_json.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ csrf: state.csrf }),
+        credentials: "same-origin",
+      });
+      if (!res.ok) return;
+      await res.json().catch(() => ({}));
+    } catch {
+      // 管理画面本体の表示は継続
+    }
   }
 
   function bindTabs() {
