@@ -10,13 +10,8 @@ DirectoryIndex index.html index.php
 # lib/ と db/ ディレクトリは非公開
 RedirectMatch 404 ^/(lib|db)(/.*)?$
 
-# uploads/ 以下での PHP 実行を禁止（アップロードされた画像は画像としてのみ配信）
-<Directory "uploads">
-  php_flag engine off
-  <FilesMatch "\.(php|phtml|phar|pl|py|sh|cgi)$">
-    Require all denied
-  </FilesMatch>
-</Directory>
+# uploads/ 以下の実行禁止は uploads/.htaccess 側で制御する
+# NOTE: <Directory> は .htaccess では使えないため、ここに書くと 500 の原因になる
 
 # JSON / 画像のキャッシュ
 <IfModule mod_expires.c>
