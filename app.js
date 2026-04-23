@@ -113,12 +113,31 @@
 
   /**
    * 公開画像データを読み込む。
-   * 本番（Xserver）では /api/pics.php から最新の承認済み投稿を取得する。
+   * 基本は /api/pics.php を使い、data/pics.json は不足分を補う。
    * ローカル開発や PHP が動かない環境では data/pics.json にフォールバックする。
    */
   async function loadPics() {
+    const dedupeById = (items) => {
+      const seen = new Set();
+      const out = [];
+      items.forEach((item) => {
+        const key = String(item?.id || item?.file || "");
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        out.push(item);
+      });
+      return out;
+    };
+
     try {
-      return await fetchJson(DATA_URL);
+      const apiPics = await fetchJson(DATA_URL);
+      try {
+        const localPics = await fetchJson(DATA_URL_FALLBACK);
+        // API を優先しつつ、JSON 側にしかない画像（例: 追加した公式画像）を補完する
+        return dedupeById([...(apiPics || []), ...(localPics || [])]);
+      } catch {
+        return apiPics;
+      }
     } catch (err) {
       console.warn(
         `[WordPics] API (${DATA_URL}) が利用できないため、${DATA_URL_FALLBACK} にフォールバックします。`,
