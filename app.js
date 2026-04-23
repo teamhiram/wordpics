@@ -249,8 +249,8 @@
 
     // Close buttons (backdrop + X + "結果を見る" on mobile)
     document.addEventListener("click", (e) => {
-      const target = e.target;
-      if (target && target.dataset && target.dataset.closeFilter === "1") {
+      const target = e.target instanceof Element ? e.target.closest("[data-close-filter='1']") : null;
+      if (target) {
         closeFilterPanel();
       }
     });

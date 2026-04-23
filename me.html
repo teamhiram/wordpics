@@ -23,12 +23,31 @@
           <span class="brand-sub">御言画像ライブラリ</span>
         </span>
       </a>
-      <nav class="header-nav" aria-label="メイン">
+      <nav id="mainNavigation" class="header-nav" aria-label="メイン">
         <a class="nav-link" href="how-to-use.html">使い方</a>
         <a class="nav-link" href="submit.html">投稿する</a>
         <a class="nav-link nav-link--accent" href="me.html">マイページ</a>
         <a id="navAdmin" class="nav-link" href="admin.html" hidden>管理</a>
       </nav>
+      <button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="mainNavigation"
+        aria-label="メニューを開く"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3 6h18M3 12h18M3 18h18"
+          />
+        </svg>
+      </button>
     </div>
   </header>
 
@@ -71,6 +90,7 @@
     </div>
   </footer>
 
+  <script src="nav.js" defer></script>
   <script>
   (async () => {
     const $ = (s) => document.querySelector(s);

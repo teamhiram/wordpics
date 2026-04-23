@@ -46,7 +46,7 @@
           aria-label="フリーワード検索"
         />
       </div>
-      <nav class="header-nav" aria-label="メイン">
+      <nav id="mainNavigation" class="header-nav" aria-label="メイン">
         <a class="nav-link" href="how-to-use.html">使い方</a>
         <a class="nav-link nav-link--accent" href="submit.html">投稿する</a>
         <a id="navMe" class="nav-link" href="me.html" hidden>マイページ</a>
@@ -67,11 +67,30 @@
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
-            d="M3 6h18M6 12h12M10 18h4"
+            d="M3 5h18l-7 8v5l-4 2v-7L3 5z"
           />
         </svg>
         <span class="filter-toggle-label">絞り込み</span>
         <span id="filterCount" class="filter-count" hidden>0</span>
+      </button>
+      <button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="mainNavigation"
+        aria-label="メニューを開く"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3 6h18M3 12h18M3 18h18"
+          />
+        </svg>
       </button>
     </div>
   </header>
@@ -250,6 +269,7 @@
     </div>
   </div>
 
+  <script src="nav.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>
