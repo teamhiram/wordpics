@@ -5,6 +5,7 @@
   const DATA_URL_FALLBACK = "data/pics.json";
   const BOOKS_URL = "data/books.json";
   const TAGS_URL = "data/tags.json";
+  const PROD_ORIGIN_FALLBACK = "https://wordpics.amana.top";
 
   const SIZE_LABEL = {
     postcard: "葉書",
@@ -58,6 +59,41 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+
+  const isLocalDevHost = ["localhost", "127.0.0.1", "::1"].includes(location.hostname);
+
+  function normalizeAssetPath(path) {
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path)) return path;
+    return path.startsWith("/") ? path : `/${path}`;
+  }
+
+  function isUploadPath(path) {
+    return /^\/?uploads\//.test(path || "");
+  }
+
+  function buildAssetUrls(path) {
+    const localUrl = normalizeAssetPath(path);
+    if (!isLocalDevHost || !isUploadPath(localUrl)) {
+      return { localUrl, remoteUrl: null };
+    }
+    return { localUrl, remoteUrl: `${PROD_ORIGIN_FALLBACK}${localUrl}` };
+  }
+
+  function setImageWithFallback(img, path) {
+    const { localUrl, remoteUrl } = buildAssetUrls(path);
+    if (!localUrl) return;
+
+    if (remoteUrl) {
+      const onError = () => {
+        img.removeEventListener("error", onError);
+        img.src = remoteUrl;
+      };
+      // Register before setting src so immediate 404s are also caught.
+      img.addEventListener("error", onError);
+    }
+    img.src = localUrl;
+  }
 
   /**
    * JSON を取得するヘルパー。404/非JSON などは失敗として投げる。
@@ -422,6 +458,9 @@
     } else {
       empty.hidden = true;
       grid.innerHTML = items.map(cardHTML).join("");
+      grid.querySelectorAll("img[data-image-path]").forEach((img) => {
+        setImageWithFallback(img, img.dataset.imagePath);
+      });
       grid.querySelectorAll(".card").forEach((el) => {
         el.addEventListener("click", () => openModal(el.dataset.id));
         el.addEventListener("keydown", (e) => {
@@ -455,7 +494,13 @@
       <article class="card" role="listitem" tabindex="0" data-id="${esc(p.id)}"
                aria-label="${esc(p.citationJa)}">
         <div class="card-thumb ${orientationClass}">
-          <img src="${esc(p.file)}" alt="${esc(p.verseText)}" loading="lazy" decoding="async" />
+          <img
+            data-image-path="${esc(p.file)}"
+            src="${esc(normalizeAssetPath(p.file))}"
+            alt="${esc(p.verseText)}"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
         <div class="card-body">
           <div class="badges card-badges">${badges}</div>
@@ -494,8 +539,9 @@
     currentPic = p;
     const book = store.bookMap[p.book];
 
-    $("#modalImg").src = p.file;
-    $("#modalImg").alt = p.verseText;
+    const modalImg = $("#modalImg");
+    setImageWithFallback(modalImg, p.file);
+    modalImg.alt = p.verseText;
     $("#modalVerse").textContent = p.verseText;
     $("#modalCitation").textContent = p.citationJa;
     $("#modalId").textContent = p.id;
@@ -525,10 +571,12 @@
     $("#modalBadges").innerHTML = modalBadges.join("");
 
     const dl = $("#modalDownload");
-    dl.href = p.file;
-    const ext = p.file.split(".").pop();
+    const { localUrl: fileUrl, remoteUrl: fallbackFileUrl } = buildAssetUrls(p.file);
+    const modalFileUrl = fallbackFileUrl || fileUrl;
+    dl.href = modalFileUrl;
+    const ext = (p.file.split(".").pop() || "png").split("?")[0];
     dl.setAttribute("download", `${p.id}-${p.book}-${p.chapter}-${p.verse}.${ext}`);
-    $("#modalOpen").href = p.file;
+    $("#modalOpen").href = modalFileUrl;
     const shareUrl = `${location.pathname}?id=${encodeURIComponent(p.id)}`;
     $("#modalShare").href = shareUrl;
 

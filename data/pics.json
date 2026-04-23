@@ -214,5 +214,43 @@
     "size": "businesscard",
     "orientation": "landscape",
     "tags": ["静寂", "平穏", "聖霊", "春", "光", "花", "自然", "鳩"]
+  },
+  {
+    "id": "019",
+    "file": "pics/businesscards/019-2Co-12-10.png",
+    "book": "2Co",
+    "chapter": 12,
+    "verse": "10",
+    "verseText": "わたしはキリストのために、弱さの中で、侮辱の中で、貧困の中で、迫害と苦悩の中で、十分に喜んでいます。なぜなら、私は弱い時にこそ、強いからです。",
+    "citationJa": "コリント人への第二の手紙 12章10節",
+    "size": "businesscard",
+    "orientation": "landscape",
+    "tags": ["喜び", "励まし", "信頼", "力", "春", "花", "緑", "自然"]
+  },
+  {
+    "id": "8254cea1-8e52-4479-a3fa-8d72f529b1ef",
+    "file": "/uploads/submissions/8254cea1-8e52-4479-a3fa-8d72f529b1ef/Psm-121-1-2-original.png",
+    "book": "Psm",
+    "chapter": 121,
+    "verse": "1-2",
+    "verseText": "わたしは山々に向かって目を上げる。わたしの助けはどこから来るのであろうか？\r\nわたしの助けはエホバから、天と地を造った方から来る。",
+    "citationJa": "詩篇 121章1-2節",
+    "size": "postcard",
+    "orientation": "landscape",
+    "tags": ["山", "助け", "緑"],
+    "source": "user"
+  },
+  {
+    "id": "ae9853c8-4f5e-4d83-b10d-10d90d915e05",
+    "file": "/uploads/submissions/ae9853c8-4f5e-4d83-b10d-10d90d915e05/Phl-4-13-original.png",
+    "book": "Phl",
+    "chapter": 4,
+    "verse": "13",
+    "verseText": "わたしは、わたしを力づけてくださる方の中で、いっさいの事柄を行なうことができるのです。",
+    "citationJa": "ピリピ人への手紙 4章13節",
+    "size": "postcard",
+    "orientation": "landscape",
+    "tags": ["太陽", "力", "元気が出る", "信頼"],
+    "source": "user"
   }
 ]
