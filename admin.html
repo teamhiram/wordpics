@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#3b5bdb" />
+  <title>管理画面 — WordPics</title>
+  <link rel="icon" type="image/svg+xml" sizes="any" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="./" class="brand" aria-label="WordPics ホーム">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-text">
+          <span class="brand-title">WordPics</span>
+          <span class="brand-sub">管理画面</span>
+        </span>
+      </a>
+      <nav class="header-nav" aria-label="メイン">
+        <a class="nav-link" href="how-to-use.html">使い方</a>
+        <a class="nav-link" href="submit.html">投稿する</a>
+        <a class="nav-link" href="me.html">マイページ</a>
+        <a class="nav-link nav-link--accent" href="admin.html">管理</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="container">
+      <h1>管理画面</h1>
+
+      <div id="loginRequired" class="page-section auth-box" hidden>
+        <h2 style="margin-top:0">管理者ログインが必要です</h2>
+        <p>管理者アカウントのメールアドレスで <a href="submit.html">ログイン</a> してください。</p>
+      </div>
+
+      <div id="adminPanel" hidden>
+        <div class="tabs">
+          <button class="tab is-active" data-tab="submissions">
+            投稿 <span id="subCount" class="tab-count">0</span>
+          </button>
+          <button class="tab" data-tab="reports">
+            誤字報告 <span id="repCount" class="tab-count">0</span>
+          </button>
+        </div>
+
+        <!-- Submissions tab -->
+        <section id="tabSubmissions" class="tab-panel">
+          <div class="chips" data-filter="status" role="group" style="margin-bottom: 16px">
+            <button type="button" class="chip is-active" data-value="pending">承認待ち</button>
+            <button type="button" class="chip" data-value="approved">公開中</button>
+            <button type="button" class="chip" data-value="rejected">却下</button>
+            <button type="button" class="chip" data-value="unpublished">非公開</button>
+            <button type="button" class="chip" data-value="all">すべて</button>
+          </div>
+          <div id="subsList" class="adminlist"></div>
+          <p id="subsEmpty" class="lead" hidden>対象の投稿はありません。</p>
+        </section>
+
+        <!-- Reports tab -->
+        <section id="tabReports" class="tab-panel" hidden>
+          <div class="chips" data-filter="rstatus" role="group" style="margin-bottom: 16px">
+            <button type="button" class="chip is-active" data-value="open">未対応</button>
+            <button type="button" class="chip" data-value="resolved">対応済</button>
+            <button type="button" class="chip" data-value="dismissed">却下</button>
+            <button type="button" class="chip" data-value="all">すべて</button>
+          </div>
+          <div id="repList" class="adminlist"></div>
+          <p id="repEmpty" class="lead" hidden>該当する報告はありません。</p>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span>© <span id="year"></span> WordPics</span>
+    </div>
+  </footer>
+
+  <script src="admin.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ff7a59" />
+  <meta name="description" content="聖書の御言をデザイン画像で閲覧・ダウンロードできるリソースサイト。" />
+  <title>WordPics — 御言画像ライブラリ</title>
+  <link rel="icon" type="image/svg+xml" sizes="any" href="assets/favicon.svg" />
+  <link rel="apple-touch-icon" href="assets/icon.svg" />
+  <link rel="mask-icon" href="assets/favicon.svg" color="#e0484a" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="./" class="brand" aria-label="WordPics ホーム">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-text">
+          <span class="brand-title">WordPics</span>
+          <span class="brand-sub">御言画像ライブラリ</span>
+        </span>
+      </a>
+      <div class="header-search search">
+        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"
+          />
+        </svg>
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="御言・タグ・書名で検索…"
+          autocomplete="off"
+          aria-label="フリーワード検索"
+        />
+      </div>
+      <nav class="header-nav" aria-label="メイン">
+        <a class="nav-link" href="how-to-use.html">使い方</a>
+        <a class="nav-link nav-link--accent" href="submit.html">投稿する</a>
+        <a id="navMe" class="nav-link" href="me.html" hidden>マイページ</a>
+        <a id="navAdmin" class="nav-link" href="admin.html" hidden>管理</a>
+      </nav>
+      <button
+        id="filterToggle"
+        class="filter-toggle-header"
+        type="button"
+        aria-expanded="false"
+        aria-controls="filterPanel"
+        aria-label="絞り込みを開く"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3 6h18M6 12h12M10 18h4"
+          />
+        </svg>
+        <span class="filter-toggle-label">絞り込み</span>
+        <span id="filterCount" class="filter-count" hidden>0</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-inner">
+        <h1>聖書の御言を、<br />美しい一枚に。</h1>
+        <p class="hero-lead">
+          葉書・名刺・スクエアなど用途に合わせたサイズで、<br class="sp-only" />
+          自由に閲覧・ダウンロードできる御言画像のライブラリ。
+        </p>
+        <div class="hero-stats" id="heroStats" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section id="gallery" class="gallery-section">
+      <div class="container">
+        <div
+          id="filterBackdrop"
+          class="filter-backdrop"
+          hidden
+          data-close-filter="1"
+        ></div>
+
+        <div
+          id="filterPanel"
+          class="filter-panel"
+          role="dialog"
+          aria-label="絞り込み"
+          aria-modal="false"
+          hidden
+        >
+          <div class="filter-panel-head">
+            <span class="filter-panel-title">絞り込み</span>
+            <div class="filter-panel-head-actions">
+              <button id="clearFilters" type="button" class="btn-ghost btn-ghost--sm">フィルタをクリア</button>
+              <button
+                class="filter-panel-close"
+                type="button"
+                aria-label="絞り込みを閉じる"
+                data-close-filter="1"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="filter-panel-body">
+            <div class="filter-group">
+              <div class="filter-label">サイズ</div>
+              <div class="chips" data-filter="size" role="group" aria-label="サイズ">
+                <button type="button" class="chip is-active" data-value="all">すべて</button>
+                <button type="button" class="chip" data-value="postcard">葉書</button>
+                <button type="button" class="chip" data-value="businesscard">名刺</button>
+                <button type="button" class="chip" data-value="square">スクエア</button>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-label">向き</div>
+              <div class="chips" data-filter="orientation" role="group" aria-label="向き">
+                <button type="button" class="chip is-active" data-value="all">すべて</button>
+                <button type="button" class="chip" data-value="landscape">横</button>
+                <button type="button" class="chip" data-value="portrait">縦</button>
+                <button type="button" class="chip" data-value="square">正方形</button>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-label">出典</div>
+              <div class="chips" data-filter="source" role="group" aria-label="出典">
+                <button type="button" class="chip is-active" data-value="all">すべて</button>
+                <button type="button" class="chip" data-value="official">公式</button>
+                <button type="button" class="chip" data-value="user">ユーザー生成</button>
+              </div>
+            </div>
+
+            <div class="filter-group filter-group--wide" data-filter-block="tag">
+              <div class="filter-label">タグ</div>
+              <div class="chips chips--all" data-filter="tag" role="group" aria-label="タグ（すべて）">
+                <button type="button" class="chip is-active" data-value="all">すべて</button>
+              </div>
+              <div id="tagSections" class="tag-sections"></div>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-label">書</div>
+              <div class="select-wrap">
+                <select id="bookSelect" aria-label="書で絞り込み">
+                  <option value="all">すべての書</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-panel-foot">
+            <button id="applyFilters" type="button" class="btn-primary">結果を見る</button>
+          </div>
+        </div>
+
+        <div class="result-bar">
+          <span id="resultCount" aria-live="polite"></span>
+        </div>
+
+        <div id="grid" class="grid" role="list"></div>
+
+        <div id="emptyState" class="empty-state" hidden>
+          <p>該当する画像が見つかりませんでした。</p>
+          <button class="btn-primary" type="button" id="emptyReset">フィルタをリセット</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span>© <span id="year"></span> WordPics</span>
+      <span class="muted">聖句は回復訳聖書（© 日本福音書房）を使用</span>
+    </div>
+  </footer>
+
+  <!-- 詳細モーダル -->
+  <div id="modal" class="modal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-backdrop" data-close="1"></div>
+    <div class="modal-dialog" role="document">
+      <button class="modal-close" type="button" aria-label="閉じる" data-close="1">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/>
+        </svg>
+      </button>
+      <div class="modal-content">
+        <figure class="modal-figure">
+          <img id="modalImg" alt="" />
+        </figure>
+        <aside class="modal-meta">
+          <span id="modalBadges" class="badges"></span>
+          <blockquote id="modalVerse" class="verse"></blockquote>
+          <p id="modalCitation" class="citation"></p>
+
+          <dl class="meta-list">
+            <div><dt>ID</dt><dd id="modalId"></dd></div>
+            <div><dt>サイズ</dt><dd id="modalSize"></dd></div>
+            <div><dt>向き</dt><dd id="modalOrientation"></dd></div>
+            <div><dt>書</dt><dd id="modalBook"></dd></div>
+            <div><dt>タグ</dt><dd id="modalTags"></dd></div>
+          </dl>
+
+          <div class="modal-actions">
+            <a id="modalDownload" class="btn-primary" download>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16"/>
+              </svg>
+              ダウンロード
+            </a>
+            <a id="modalOpen" class="btn-ghost" target="_blank" rel="noopener">画像を開く</a>
+            <a id="modalShare" class="btn-ghost" target="_blank" rel="noopener">新しいタブで開く</a>
+            <button id="modalReport" type="button" class="btn-ghost btn-ghost--danger">誤字報告</button>
+          </div>
+
+          <div id="reportForm" class="report-form" hidden>
+            <label class="field-label" for="reportMessage">誤字や不適切な点をご報告ください</label>
+            <textarea id="reportMessage" rows="4" placeholder="例：「愛は耐え忍び」が「愛は耐え忍ぴ」になっています。"></textarea>
+            <div class="report-form-actions">
+              <button type="button" id="reportCancel" class="btn-ghost btn-ghost--sm">キャンセル</button>
+              <button type="button" id="reportSubmit" class="btn-primary btn-primary--sm">送信する</button>
+            </div>
+            <p id="reportStatus" class="report-status" aria-live="polite"></p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

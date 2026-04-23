@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="WordPics">
+  <defs>
+    <linearGradient id="wp-bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffb07a"/>
+      <stop offset="0.55" stop-color="#ff7a59"/>
+      <stop offset="1" stop-color="#e0484a"/>
+    </linearGradient>
+    <linearGradient id="wp-page-l" x1="6" y1="22" x2="32" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#ffe4c7"/>
+    </linearGradient>
+    <linearGradient id="wp-page-r" x1="58" y1="22" x2="32" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#ffe4c7"/>
+    </linearGradient>
+    <linearGradient id="wp-stack" x1="32" y1="48" x2="32" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f4b58a"/>
+      <stop offset="1" stop-color="#d87b52"/>
+    </linearGradient>
+    <linearGradient id="wp-heart" x1="24" y1="8" x2="40" y2="22" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ff9a7a"/>
+      <stop offset="1" stop-color="#d8363a"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="14" fill="url(#wp-bg)"/>
+
+  <ellipse cx="32" cy="55.5" rx="24" ry="2.6" fill="#5e140c" opacity="0.28"/>
+
+  <path d="M6 50 L32 53 L58 50 L56.5 54 L32 56.5 L7.5 54 Z" fill="url(#wp-stack)"/>
+
+  <path d="M6 24
+           Q 19 20 32 26
+           L 32 50
+           Q 19 46 6 50 Z"
+        fill="url(#wp-page-l)"
+        stroke="#b4341d" stroke-width="0.9" stroke-opacity="0.35"/>
+
+  <path d="M58 24
+           Q 45 20 32 26
+           L 32 50
+           Q 45 46 58 50 Z"
+        fill="url(#wp-page-r)"
+        stroke="#b4341d" stroke-width="0.9" stroke-opacity="0.35"/>
+
+  <path d="M32 26 L32 50" stroke="#a52a1a" stroke-width="1.1" stroke-linecap="round" opacity="0.55"/>
+
+  <g stroke="#d8363a" stroke-width="1" stroke-linecap="round" opacity="0.7">
+    <line x1="11" y1="31" x2="29" y2="30.2"/>
+    <line x1="11" y1="35" x2="29" y2="34.4"/>
+    <line x1="11" y1="39" x2="26" y2="38.6"/>
+    <line x1="11" y1="43" x2="28" y2="42.8"/>
+  </g>
+  <g stroke="#d8363a" stroke-width="1" stroke-linecap="round" opacity="0.7">
+    <line x1="35" y1="30.2" x2="53" y2="31"/>
+    <line x1="35" y1="34.4" x2="53" y2="35"/>
+    <line x1="38" y1="38.6" x2="53" y2="39"/>
+    <line x1="36" y1="42.8" x2="53" y2="43"/>
+  </g>
+
+  <g>
+    <path d="M32 22.5
+             C 30.6 20 27.4 19.6 26.2 21.6
+             C 25 23.6 26.6 25.6 32 28.6
+             C 37.4 25.6 39 23.6 37.8 21.6
+             C 36.6 19.6 33.4 20 32 22.5 Z"
+          fill="url(#wp-heart)"
+          stroke="#7a1a10" stroke-width="0.7" stroke-opacity="0.45"/>
+    <path d="M28.4 21.6
+             C 28.8 21 29.6 20.8 30.4 21.2"
+          stroke="#ffd7c2" stroke-width="0.7" stroke-linecap="round" opacity="0.85" fill="none"/>
+  </g>
+</svg>

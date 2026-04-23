@@ -1,0 +1,44 @@
+<?php
+/**
+ * WordPics — ローカル設定ファイル
+ *
+ * このファイルを `config.local.php` にコピーして、Xserver サーバパネルで
+ * 発行した MySQL の接続情報などを入力してください。
+ * `config.local.php` は .gitignore に入っており、Git には入りません。
+ */
+
+return [
+    // ====== データベース（Xserver サーバパネルで MySQL を作成して取得） ======
+    'db' => [
+        'host'     => 'mysqlxxx.xserver.jp', // Xserver から発行されるホスト名
+        'name'     => 'xs123456_wordpics',   // データベース名
+        'user'     => 'xs123456_wp',         // ユーザー名
+        'password' => 'YOUR_DB_PASSWORD',
+        'charset'  => 'utf8mb4',
+    ],
+
+    // ====== サイト URL（https://... の形で、末尾スラッシュなし） ======
+    'site_origin' => 'https://wordpics.amana.top',
+
+    // ====== 管理者メール（カンマ区切り複数可） ======
+    'admin_emails'       => 'tatsuya.n@gmail.com',
+    'admin_notify_email' => 'tatsuya.n@gmail.com',
+
+    // ====== 送信元メール ======
+    //   Xserver の mail() を使う場合は `noreply@yourdomain.com` のように
+    //   契約ドメインのアドレスを指定してください。
+    //   amana.top で MX / SPF を設定済みなら下のアドレスが使えます。
+    'mail_from'      => 'noreply@amana.top',
+    'mail_from_name' => 'WordPics',
+
+    // ====== Resend を使う場合（任意）======
+    //   空文字または未設定なら PHP の mail() 関数を使います。
+    'resend_api_key' => '',
+
+    // ====== セッション・CSRF 署名用のランダム秘密鍵 ======
+    //   `openssl rand -hex 32` などで生成した 64 文字の文字列を入れてください。
+    'session_secret' => 'CHANGE_ME_TO_A_RANDOM_64_CHAR_HEX_STRING',
+
+    // ====== アップロード上限（バイト） ======
+    'max_upload_bytes' => 10 * 1024 * 1024, // 10MB
+];

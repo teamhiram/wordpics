@@ -1,0 +1,37 @@
+# ====== WordPics / Xserver 用 .htaccess ======
+
+DirectoryIndex index.html index.php
+
+# 機密ファイルへの直接アクセスを拒否
+<FilesMatch "^(config\.local\.php|\.env|\.gitignore|README\.md|my-gpt-promp\.md)$">
+  Require all denied
+</FilesMatch>
+
+# lib/ と db/ ディレクトリは非公開
+RedirectMatch 404 ^/(lib|db)(/.*)?$
+
+# uploads/ 以下での PHP 実行を禁止（アップロードされた画像は画像としてのみ配信）
+<Directory "uploads">
+  php_flag engine off
+  <FilesMatch "\.(php|phtml|phar|pl|py|sh|cgi)$">
+    Require all denied
+  </FilesMatch>
+</Directory>
+
+# JSON / 画像のキャッシュ
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/jpeg "access plus 30 days"
+  ExpiresByType image/svg+xml "access plus 30 days"
+  ExpiresByType text/css "access plus 1 hour"
+  ExpiresByType application/javascript "access plus 1 hour"
+</IfModule>
+
+# gzip
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
+</IfModule>
+
+# UTF-8 デフォルト
+AddDefaultCharset UTF-8
