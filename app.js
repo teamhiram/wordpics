@@ -15,7 +15,7 @@
   const ORIENTATION_LABEL = {
     landscape: "横",
     portrait: "縦",
-    square: "正方形",
+    square: "スクエア",
   };
   const SOURCE_LABEL = {
     official: "公式",
@@ -95,6 +95,51 @@
     img.src = localUrl;
   }
 
+  function parseTimeValue(value) {
+    if (!value) return null;
+    const ms = Date.parse(String(value));
+    return Number.isFinite(ms) ? ms : null;
+  }
+
+  function formatPublishedAt(value) {
+    const ms = parseTimeValue(value);
+    if (ms == null) return "—";
+    const d = new Date(ms);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mm = String(d.getMinutes()).padStart(2, "0");
+    return `${y}/${m}/${day} ${hh}:${mm}`;
+  }
+
+  function numericIdValue(item) {
+    const id = String(item?.id || "");
+    return /^\d+$/.test(id) ? Number(id) : null;
+  }
+
+  function sortByNewest(items) {
+    return [...items].sort((a, b) => {
+      const ta = parseTimeValue(a.createdAt || a.created_at);
+      const tb = parseTimeValue(b.createdAt || b.created_at);
+      if (ta != null || tb != null) {
+        if (ta == null) return 1;
+        if (tb == null) return -1;
+        if (ta !== tb) return tb - ta;
+      }
+
+      const na = numericIdValue(a);
+      const nb = numericIdValue(b);
+      if (na != null || nb != null) {
+        if (na == null || nb == null) return 0;
+        if (na !== nb) return nb - na;
+      }
+
+      // Keep source order for non-comparable items.
+      return store.pics.indexOf(a) - store.pics.indexOf(b);
+    });
+  }
+
   /**
    * JSON を取得するヘルパー。404/非JSON などは失敗として投げる。
    */
@@ -117,24 +162,24 @@
    * ローカル開発や PHP が動かない環境では data/pics.json にフォールバックする。
    */
   async function loadPics() {
-    const dedupeById = (items) => {
-      const seen = new Set();
-      const out = [];
-      items.forEach((item) => {
-        const key = String(item?.id || item?.file || "");
-        if (!key || seen.has(key)) return;
-        seen.add(key);
-        out.push(item);
-      });
-      return out;
-    };
-
     try {
       const apiPics = await fetchJson(DATA_URL);
       try {
         const localPics = await fetchJson(DATA_URL_FALLBACK);
-        // API を優先しつつ、JSON 側にしかない画像（例: 追加した公式画像）を補完する
-        return dedupeById([...(apiPics || []), ...(localPics || [])]);
+        const byId = new Map();
+        (localPics || []).forEach((item) => {
+          const key = String(item?.id || item?.file || "");
+          if (!key) return;
+          byId.set(key, item);
+        });
+        // API で上書きしつつ、JSON 側の createdAt など不足プロパティは保持
+        (apiPics || []).forEach((item) => {
+          const key = String(item?.id || item?.file || "");
+          if (!key) return;
+          if (byId.has(key)) byId.set(key, { ...byId.get(key), ...item });
+          else byId.set(key, item);
+        });
+        return Array.from(byId.values());
       } catch {
         return apiPics;
       }
@@ -348,7 +393,8 @@
 
     // Modal close (click outside / ESC)
     $("#modal").addEventListener("click", (e) => {
-      if (e.target.dataset.close === "1") closeModal();
+      const target = e.target instanceof Element ? e.target.closest("[data-close='1']") : null;
+      if (target) closeModal();
     });
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
@@ -434,7 +480,7 @@
   // ========== Filtering ==========
   function filterPics() {
     const q = state.q;
-    return store.pics.filter((p) => {
+    const filtered = store.pics.filter((p) => {
       if (state.size !== "all" && p.size !== state.size) return false;
       if (state.orientation !== "all" && p.orientation !== state.orientation) return false;
       if (state.source !== "all" && (p.source || "official") !== state.source) return false;
@@ -460,6 +506,7 @@
       }
       return true;
     });
+    return sortByNewest(filtered);
   }
 
   // ========== Rendering ==========
@@ -509,6 +556,7 @@
       badgeList.unshift(`<span class="badge badge--user">ユーザー生成</span>`);
     }
     const badges = badgeList.join("");
+    const publishedLabel = formatPublishedAt(p.createdAt || p.created_at);
     return `
       <article class="card" role="listitem" tabindex="0" data-id="${esc(p.id)}"
                aria-label="${esc(p.citationJa)}">
@@ -525,6 +573,7 @@
           <div class="badges card-badges">${badges}</div>
           <div class="card-verse">${esc(p.verseText)}</div>
           <div class="card-citation">${esc(p.citationJa)}</div>
+          <div class="card-published">公開: ${esc(publishedLabel)}</div>
         </div>
       </article>
     `;
@@ -545,9 +594,9 @@
     const sizes = new Set(store.pics.map((p) => p.size));
     const books = new Set(store.pics.map((p) => p.book));
     el.innerHTML = [
-      `<span class="pill">${n} 枚の御言画像</span>`,
-      `<span class="pill">${sizes.size} サイズ対応</span>`,
-      `<span class="pill">${books.size} 書からの御言</span>`,
+      `<span class="pill">${n}枚</span>`,
+      `<span class="pill">${sizes.size}サイズ</span>`,
+      `<span class="pill">${books.size}の書</span>`,
     ].join("");
   }
 
@@ -561,12 +610,28 @@
     const modalImg = $("#modalImg");
     setImageWithFallback(modalImg, p.file);
     modalImg.alt = p.verseText;
+    modalImg.dataset.size = p.size || "";
+    modalImg.dataset.orientation = p.orientation || "";
     $("#modalVerse").textContent = p.verseText;
     $("#modalCitation").textContent = p.citationJa;
     $("#modalId").textContent = p.id;
-    $("#modalSize").textContent = SIZE_LABEL[p.size] || p.size;
-    $("#modalOrientation").textContent = ORIENTATION_LABEL[p.orientation] || p.orientation;
-    $("#modalBook").textContent = book ? `${book.ja}（${book.en}）` : p.book;
+    const modalSize = $("#modalSize");
+    const modalOrientation = $("#modalOrientation");
+    const modalSource = $("#modalSource");
+    const sizeLabel = SIZE_LABEL[p.size] || p.size;
+    const orientationLabel = ORIENTATION_LABEL[p.orientation] || p.orientation;
+    const sourceValue = p.source || "official";
+    const sourceLabel = SOURCE_LABEL[sourceValue] || sourceValue;
+    modalSource.innerHTML = `<button type="button" class="meta-filter-chip" data-source="${esc(sourceValue)}">${esc(sourceLabel)}</button>`;
+    modalSize.innerHTML = `<button type="button" class="meta-filter-chip" data-size="${esc(p.size)}">${esc(sizeLabel)}</button>`;
+    modalOrientation.innerHTML = `<button type="button" class="meta-filter-chip" data-orientation="${esc(p.orientation)}">${esc(orientationLabel)}</button>`;
+    const modalBook = $("#modalBook");
+    const modalBookLabel = book ? `${book.ja}（${book.en}）` : p.book;
+    modalBook.innerHTML = `<button type="button" class="meta-link-btn" data-book="${esc(p.book)}">${esc(modalBookLabel)}</button>`;
+    const modalPublishedAt = $("#modalPublishedAt");
+    if (modalPublishedAt) {
+      modalPublishedAt.textContent = formatPublishedAt(p.createdAt || p.created_at);
+    }
 
     resetReportForm();
 
@@ -580,24 +645,12 @@
       ? `<span class="tag-list">${tagsHtml}</span>`
       : "—";
 
-    const modalBadges = [
-      `<span class="badge">${esc(SIZE_LABEL[p.size] || p.size)}</span>`,
-      `<span class="badge is-neutral">${esc(ORIENTATION_LABEL[p.orientation] || p.orientation)}</span>`,
-    ];
-    if (p.source === "user") {
-      modalBadges.unshift(`<span class="badge badge--user">ユーザー生成</span>`);
-    }
-    $("#modalBadges").innerHTML = modalBadges.join("");
-
     const dl = $("#modalDownload");
     const { localUrl: fileUrl, remoteUrl: fallbackFileUrl } = buildAssetUrls(p.file);
     const modalFileUrl = fallbackFileUrl || fileUrl;
     dl.href = modalFileUrl;
     const ext = (p.file.split(".").pop() || "png").split("?")[0];
     dl.setAttribute("download", `${p.id}-${p.book}-${p.chapter}-${p.verse}.${ext}`);
-    $("#modalOpen").href = modalFileUrl;
-    const shareUrl = `${location.pathname}?id=${encodeURIComponent(p.id)}`;
-    $("#modalShare").href = shareUrl;
 
     $("#modalTags")
       .querySelectorAll(".tag-link")
@@ -609,6 +662,38 @@
           applyTagFilter(btn.dataset.tag);
         });
       });
+    modalSize.querySelectorAll(".meta-filter-chip[data-size]").forEach((btn) => {
+      btn.title = `サイズ「${btn.textContent}」で絞り込む`;
+      btn.setAttribute("aria-label", `サイズ「${btn.textContent}」で絞り込む`);
+      btn.addEventListener("click", () => {
+        closeModal();
+        applySizeFilter(btn.dataset.size);
+      });
+    });
+    modalOrientation.querySelectorAll(".meta-filter-chip[data-orientation]").forEach((btn) => {
+      btn.title = `向き「${btn.textContent}」で絞り込む`;
+      btn.setAttribute("aria-label", `向き「${btn.textContent}」で絞り込む`);
+      btn.addEventListener("click", () => {
+        closeModal();
+        applyOrientationFilter(btn.dataset.orientation);
+      });
+    });
+    modalSource.querySelectorAll(".meta-filter-chip[data-source]").forEach((btn) => {
+      btn.title = `出典「${btn.textContent}」で絞り込む`;
+      btn.setAttribute("aria-label", `出典「${btn.textContent}」で絞り込む`);
+      btn.addEventListener("click", () => {
+        closeModal();
+        applySourceFilter(btn.dataset.source);
+      });
+    });
+    modalBook.querySelectorAll(".meta-link-btn").forEach((btn) => {
+      btn.title = `書「${btn.dataset.book}」で絞り込む`;
+      btn.setAttribute("aria-label", `書「${btn.dataset.book}」で絞り込む`);
+      btn.addEventListener("click", () => {
+        closeModal();
+        applyBookFilter(btn.dataset.book);
+      });
+    });
 
     const modal = $("#modal");
     modal.hidden = false;
@@ -619,7 +704,7 @@
     if (opts.updateUrl !== false) {
       const current = new URLSearchParams(location.search).get("id");
       if (current !== p.id) {
-        history.pushState({ modalId: p.id }, "", shareUrl);
+        history.pushState({ modalId: p.id }, "", `${location.pathname}?id=${encodeURIComponent(p.id)}`);
       }
     }
   }
@@ -628,6 +713,41 @@
     state.tag = tag;
     $$('.chips[data-filter="tag"] .chip').forEach((c) => {
       c.classList.toggle("is-active", c.dataset.value === tag);
+    });
+    render();
+    document.getElementById("gallery").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function applyBookFilter(bookAbbr) {
+    state.book = bookAbbr;
+    const bookSelect = $("#bookSelect");
+    if (bookSelect) bookSelect.value = bookAbbr;
+    render();
+    document.getElementById("gallery").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function applySizeFilter(size) {
+    state.size = size;
+    $$('.chips[data-filter="size"] .chip').forEach((c) => {
+      c.classList.toggle("is-active", c.dataset.value === size);
+    });
+    render();
+    document.getElementById("gallery").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function applyOrientationFilter(orientation) {
+    state.orientation = orientation;
+    $$('.chips[data-filter="orientation"] .chip').forEach((c) => {
+      c.classList.toggle("is-active", c.dataset.value === orientation);
+    });
+    render();
+    document.getElementById("gallery").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function applySourceFilter(source) {
+    state.source = source;
+    $$('.chips[data-filter="source"] .chip').forEach((c) => {
+      c.classList.toggle("is-active", c.dataset.value === source);
     });
     render();
     document.getElementById("gallery").scrollIntoView({ behavior: "smooth", block: "start" });

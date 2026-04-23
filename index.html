@@ -158,7 +158,6 @@
                 <button type="button" class="chip is-active" data-value="all">すべて</button>
                 <button type="button" class="chip" data-value="landscape">横</button>
                 <button type="button" class="chip" data-value="portrait">縦</button>
-                <button type="button" class="chip" data-value="square">正方形</button>
               </div>
             </div>
 
@@ -228,32 +227,21 @@
       <div class="modal-content">
         <figure class="modal-figure">
           <img id="modalImg" alt="" />
+          <p class="modal-image-tip">画像を長押しして保存できます。</p>
         </figure>
         <aside class="modal-meta">
-          <span id="modalBadges" class="badges"></span>
           <blockquote id="modalVerse" class="verse"></blockquote>
           <p id="modalCitation" class="citation"></p>
 
           <dl class="meta-list">
             <div><dt>ID</dt><dd id="modalId"></dd></div>
+            <div><dt>公開日</dt><dd id="modalPublishedAt"></dd></div>
+            <div><dt>出典</dt><dd id="modalSource"></dd></div>
             <div><dt>サイズ</dt><dd id="modalSize"></dd></div>
             <div><dt>向き</dt><dd id="modalOrientation"></dd></div>
             <div><dt>書</dt><dd id="modalBook"></dd></div>
             <div><dt>タグ</dt><dd id="modalTags"></dd></div>
           </dl>
-
-          <div class="modal-actions">
-            <a id="modalDownload" class="btn-primary" download>
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                      d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16"/>
-              </svg>
-              ダウンロード
-            </a>
-            <a id="modalOpen" class="btn-ghost" target="_blank" rel="noopener">画像を開く</a>
-            <a id="modalShare" class="btn-ghost" target="_blank" rel="noopener">新しいタブで開く</a>
-            <button id="modalReport" type="button" class="btn-ghost btn-ghost--danger">誤字報告</button>
-          </div>
 
           <div id="reportForm" class="report-form" hidden>
             <label class="field-label" for="reportMessage">誤字や不適切な点をご報告ください</label>
@@ -265,6 +253,18 @@
             <p id="reportStatus" class="report-status" aria-live="polite"></p>
           </div>
         </aside>
+      </div>
+      <div class="modal-footer">
+        <div class="modal-actions">
+          <a id="modalDownload" class="btn-primary" download>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16"/>
+            </svg>
+            ダウンロード
+          </a>
+          <button id="modalReport" type="button" class="btn-ghost btn-ghost--danger">誤字報告</button>
+        </div>
       </div>
     </div>
   </div>
