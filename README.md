@@ -125,6 +125,36 @@ cp config.local.php.example config.local.php
 
 ---
 
+## GitHub Actions で Xserver へ自動デプロイ
+
+`main` ブランチへ `push` すると、GitHub Actions が Xserver へ自動アップロードします。
+
+ワークフロー: `.github/workflows/deploy-xserver.yml`
+
+### 1. GitHub Secrets を設定
+
+リポジトリの **Settings → Secrets and variables → Actions** で以下を追加:
+
+- `XSERVER_FTP_HOST`（例: `svXXXX.xserver.jp`）
+- `XSERVER_FTP_USER`（FTP ユーザー名）
+- `XSERVER_FTP_PASSWORD`（FTP パスワード）
+- `XSERVER_FTP_REMOTE_DIR`（例: `/home/<server-id>/<domain>/public_html/`）
+
+### 2. 自動デプロイの動作
+
+- トリガー: `main` への `push`（手動実行 `workflow_dispatch` も可）
+- 転送方式: FTP over TLS（FTPS, port 21）
+- 除外: `.git` / `.github` / `_prep` / `.env` / `config.local.php` / `uploads/`
+
+> 重要: `uploads/` はサーバー上の投稿データを保持するため、ワークフローから除外しています。
+> 既存データを消さないため、この設定は変更しないでください。
+
+### 3. 初回確認
+
+1. `main` にコミットを push
+2. GitHub の **Actions** タブで `Deploy to Xserver` が成功することを確認
+3. サイトを開いて変更が反映されていることを確認
+
 ## 📧 メール送信の設定について
 
 ### 基本: Xserver の標準 `mail()` でまず試す
