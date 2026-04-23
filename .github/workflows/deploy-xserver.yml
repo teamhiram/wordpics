@@ -14,9 +14,22 @@ jobs:
   ftp-deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Normalize server directory
+        id: normalize_dir
+        shell: bash
+        run: |
+          raw_dir="${{ secrets.XSERVER_FTP_REMOTE_DIR }}"
+          if [[ "$raw_dir" == */ ]]; then
+            echo "server_dir=$raw_dir" >> "$GITHUB_OUTPUT"
+          else
+            echo "server_dir=$raw_dir/" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Deploy via FTP(S)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -26,7 +39,7 @@ jobs:
           password: ${{ secrets.XSERVER_FTP_PASSWORD }}
           protocol: ftps
           port: 21
-          server-dir: ${{ secrets.XSERVER_FTP_REMOTE_DIR }}
+          server-dir: ${{ steps.normalize_dir.outputs.server_dir }}
           exclude: |
             **/.git*
             **/.git*/**
