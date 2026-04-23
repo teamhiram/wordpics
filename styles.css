@@ -1311,6 +1311,14 @@ button.tag-link:focus-visible {
   margin: 60px auto 0;
 }
 
+.admin-edit-modal-dialog {
+  width: min(880px, 100%);
+}
+.admin-edit-modal-body {
+  padding: 28px;
+  overflow: auto;
+}
+
 /* How-to numbered steps */
 .steps { counter-reset: step; list-style: none; padding: 0; margin: 16px 0 0; }
 .steps > li {

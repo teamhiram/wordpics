@@ -14,6 +14,8 @@
 
   const STATUS_LABEL = { pending: "承認待ち", approved: "公開中", rejected: "却下", unpublished: "非公開" };
   const FILTER_LABEL = { pending: "承認待ち", approved: "公開中", rejected: "却下", unpublished: "非公開", all: "すべて" };
+  const EDIT_SIZE = ["postcard", "businesscard", "square"];
+  const EDIT_ORIENTATION = ["landscape", "portrait", "square"];
 
   async function init() {
     $("#year").textContent = new Date().getFullYear();
@@ -29,6 +31,7 @@
 
     bindTabs();
     bindChipGroups();
+    bindEditModal();
     await loadSubs();
     await loadReports(); // load counts only
   }
@@ -145,7 +148,7 @@
     if (!id || !action) return;
 
     if (action === "edit_props") {
-      await editSubmissionProps(id);
+      openEditModal(id);
       return;
     } else if (action === "reject") {
       const reason = window.prompt("却下理由（投稿者に通知されます）", "") || "";
@@ -162,50 +165,99 @@
     await loadSubs();
   }
 
-  async function editSubmissionProps(id) {
+  function bindEditModal() {
+    const modal = $("#editModal");
+    const form = $("#editForm");
+    if (!modal || !form) return;
+
+    modal.addEventListener("click", (e) => {
+      const target = e.target instanceof Element ? e.target.closest("[data-edit-close='1']") : null;
+      if (target) closeEditModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !modal.hidden) closeEditModal();
+    });
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      await saveEditModal();
+    });
+  }
+
+  function openEditModal(id) {
     const s = state.subMap.get(String(id));
     if (!s) return;
+    $("#editSubmissionId").value = String(s.id || "");
+    $("#editBookAbbr").value = s.book || "";
+    $("#editChapter").value = String(s.chapter || "");
+    $("#editVerse").value = s.verse || "";
+    $("#editCitationJa").value = s.citationJa || "";
+    $("#editVerseText").value = s.verseText || "";
+    $("#editSize").value = s.size || "postcard";
+    $("#editOrientation").value = s.orientation || "landscape";
+    $("#editTags").value = (s.tags || []).join(", ");
+    $("#editNotes").value = s.notes || "";
+    $("#editStatus").textContent = "";
 
-    const book_abbr = window.prompt("書略号（例: Mat）", s.book || "");
-    if (book_abbr === null) return;
-    const chapterRaw = window.prompt("章（数値）", String(s.chapter || ""));
-    if (chapterRaw === null) return;
-    const verse = window.prompt("節（例: 12 / 1-2）", s.verse || "");
-    if (verse === null) return;
-    const citation_ja = window.prompt("引用表記", s.citationJa || "");
-    if (citation_ja === null) return;
-    const verse_text = window.prompt("御言本文", s.verseText || "");
-    if (verse_text === null) return;
-    const size = window.prompt("サイズ（postcard / businesscard / square）", s.size || "");
-    if (size === null) return;
-    const orientation = window.prompt("向き（landscape / portrait / square）", s.orientation || "");
-    if (orientation === null) return;
-    const tags = window.prompt("タグ（カンマ区切り）", (s.tags || []).join(", "));
-    if (tags === null) return;
+    const modal = $("#editModal");
+    modal.hidden = false;
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
 
-    const chapter = Number(chapterRaw);
-    if (!Number.isInteger(chapter) || chapter < 1) {
-      alert("章は 1 以上の整数で入力してください。");
+  function closeEditModal() {
+    const modal = $("#editModal");
+    modal.hidden = true;
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  async function saveEditModal() {
+    const id = $("#editSubmissionId").value.trim();
+    const payload = {
+      id,
+      book_abbr: $("#editBookAbbr").value.trim(),
+      chapter: Number($("#editChapter").value),
+      verse: $("#editVerse").value.trim(),
+      citation_ja: $("#editCitationJa").value.trim(),
+      verse_text: $("#editVerseText").value.trim(),
+      size: $("#editSize").value.trim(),
+      orientation: $("#editOrientation").value.trim(),
+      tags: $("#editTags").value.trim(),
+      notes: $("#editNotes").value.trim(),
+    };
+    const status = $("#editStatus");
+    const saveBtn = $("#editSaveBtn");
+
+    if (!id) {
+      status.textContent = "対象IDが不正です。";
+      return;
+    }
+    if (!Number.isInteger(payload.chapter) || payload.chapter < 1) {
+      status.textContent = "章は 1 以上の整数で入力してください。";
+      return;
+    }
+    if (!EDIT_SIZE.includes(payload.size)) {
+      status.textContent = "サイズの値が不正です。";
+      return;
+    }
+    if (!EDIT_ORIENTATION.includes(payload.orientation)) {
+      status.textContent = "向きの値が不正です。";
       return;
     }
 
-    const ok = window.confirm("プロパティを保存します。よろしいですか？");
-    if (!ok) return;
-
-    const res = await postJson("/api/admin/submission_update.php", {
-      id,
-      book_abbr: String(book_abbr).trim(),
-      chapter,
-      verse: String(verse).trim(),
-      verse_text: String(verse_text).trim(),
-      citation_ja: String(citation_ja).trim(),
-      size: String(size).trim(),
-      orientation: String(orientation).trim(),
-      tags: String(tags).trim(),
-    });
-    if (res?.ok) {
-      alert("プロパティを更新しました。");
-      await loadSubs();
+    saveBtn.disabled = true;
+    status.textContent = "保存中…";
+    try {
+      const res = await postJson("/api/admin/submission_update.php", payload);
+      if (res?.ok) {
+        status.textContent = "保存しました。";
+        await loadSubs();
+        closeEditModal();
+      } else {
+        status.textContent = "保存に失敗しました。";
+      }
+    } finally {
+      saveBtn.disabled = false;
     }
   }
 

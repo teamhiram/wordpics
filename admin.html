@@ -97,6 +97,84 @@
     </div>
   </main>
 
+  <div id="editModal" class="modal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="modal-backdrop" data-edit-close="1"></div>
+    <div class="modal-dialog admin-edit-modal-dialog" role="document">
+      <button class="modal-close" type="button" aria-label="閉じる" data-edit-close="1">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/>
+        </svg>
+      </button>
+      <div class="admin-edit-modal-body">
+        <h2 id="editModalTitle" style="margin-top:0">投稿プロパティ編集</h2>
+        <p class="form-help" style="margin-top:-6px">保存すると DB と data/pics.json が同期更新されます。</p>
+
+        <form id="editForm" class="form-grid" novalidate>
+          <input type="hidden" id="editSubmissionId" />
+          <div class="form-row form-row--triple">
+            <div class="form-row">
+              <label for="editBookAbbr">書略号</label>
+              <input id="editBookAbbr" type="text" maxlength="8" required />
+            </div>
+            <div class="form-row">
+              <label for="editChapter">章</label>
+              <input id="editChapter" type="number" min="1" max="500" required />
+            </div>
+            <div class="form-row">
+              <label for="editVerse">節</label>
+              <input id="editVerse" type="text" maxlength="20" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label for="editCitationJa">引用表記</label>
+            <input id="editCitationJa" type="text" maxlength="100" required />
+          </div>
+
+          <div class="form-row">
+            <label for="editVerseText">御言本文</label>
+            <textarea id="editVerseText" rows="4" maxlength="1000" required></textarea>
+          </div>
+
+          <div class="form-row form-row--split">
+            <div class="form-row">
+              <label for="editSize">サイズ</label>
+              <select id="editSize" required>
+                <option value="postcard">葉書</option>
+                <option value="businesscard">名刺</option>
+                <option value="square">スクエア</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="editOrientation">向き</label>
+              <select id="editOrientation" required>
+                <option value="landscape">横</option>
+                <option value="portrait">縦</option>
+                <option value="square">スクエア</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label for="editTags">タグ（カンマ区切り）</label>
+            <input id="editTags" type="text" maxlength="400" />
+          </div>
+
+          <div class="form-row">
+            <label for="editNotes">メモ</label>
+            <textarea id="editNotes" rows="3" maxlength="1000"></textarea>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:8px">
+            <button id="editCancelBtn" type="button" class="btn-ghost btn-ghost--sm" data-edit-close="1">キャンセル</button>
+            <button id="editSaveBtn" type="submit" class="btn-primary btn-primary--sm">保存する</button>
+          </div>
+          <p id="editStatus" class="form-help" aria-live="polite"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <footer class="site-footer">
     <div class="container footer-inner">
       <span>© <span id="year"></span> WordPics</span>

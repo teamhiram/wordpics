@@ -17,6 +17,7 @@ $citationJa  = trim((string)($in['citation_ja'] ?? ''));
 $size        = trim((string)($in['size'] ?? ''));
 $orientation = trim((string)($in['orientation'] ?? ''));
 $tagsRaw     = (string)($in['tags'] ?? '');
+$notes       = trim((string)($in['notes'] ?? ''));
 
 if ($id === '') wp_bad('id が必要です');
 if ($bookAbbr === '' || !preg_match('/^[A-Za-z0-9]{2,8}$/', $bookAbbr)) wp_bad('書略号が不正です');
@@ -29,6 +30,7 @@ $allowedSizes = ['postcard', 'businesscard', 'square'];
 $allowedOrientations = ['landscape', 'portrait', 'square'];
 if (!in_array($size, $allowedSizes, true)) wp_bad('サイズが不正です');
 if (!in_array($orientation, $allowedOrientations, true)) wp_bad('向きが不正です');
+if (mb_strlen($notes) > 1000) wp_bad('メモが長すぎます');
 
 $tagList = array_values(array_filter(array_map(
     fn($t) => mb_substr(trim($t), 0, 20),
@@ -51,7 +53,8 @@ $pdo->prepare(
             citation_ja = ?,
             size = ?,
             orientation = ?,
-            tags = ?
+            tags = ?,
+            notes = ?
       WHERE id = ?"
 )->execute([
     $bookAbbr,
@@ -62,6 +65,7 @@ $pdo->prepare(
     $size,
     $orientation,
     json_encode($tagList, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+    $notes !== '' ? $notes : null,
     $id,
 ]);
 
