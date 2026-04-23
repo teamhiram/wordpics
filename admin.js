@@ -9,9 +9,11 @@
     csrf: null,
     subStatus: "pending",
     repStatus: "open",
+    subMap: new Map(),
   };
 
   const STATUS_LABEL = { pending: "承認待ち", approved: "公開中", rejected: "却下", unpublished: "非公開" };
+  const FILTER_LABEL = { pending: "承認待ち", approved: "公開中", rejected: "却下", unpublished: "非公開", all: "すべて" };
 
   async function init() {
     $("#year").textContent = new Date().getFullYear();
@@ -71,13 +73,24 @@
     const data = await res.json().catch(() => ({}));
     $("#subCount").textContent = data.counts?.pending_submissions ?? 0;
     $("#repCount").textContent = data.counts?.open_reports ?? 0;
+    updateStatusFilterCounts(data.counts?.submissions_by_status || {});
     const items = data.items || [];
+    state.subMap = new Map(items.map((x) => [String(x.id), x]));
     const host = $("#subsList");
     $("#subsEmpty").hidden = items.length > 0;
     host.innerHTML = items.map(renderSubItem).join("");
     host.querySelectorAll("[data-sub-action]").forEach((btn) =>
       btn.addEventListener("click", () => handleSubAction(btn))
     );
+  }
+
+  function updateStatusFilterCounts(counts) {
+    $$('.chips[data-filter="status"] .chip').forEach((chip) => {
+      const key = chip.dataset.value;
+      const base = FILTER_LABEL[key] || chip.textContent.replace(/\s*\(\d+\)\s*$/, "");
+      const n = Number.isFinite(Number(counts[key])) ? Number(counts[key]) : 0;
+      chip.textContent = `${base} (${n})`;
+    });
   }
 
   function renderSubItem(s) {
@@ -93,6 +106,7 @@
     const primaryFile = s.revised_file || s.original_file;
 
     const actions = [];
+    actions.push(`<button class="btn-ghost" data-sub-action="edit_props" data-id="${esc(s.id)}">プロパティ編集</button>`);
     if (s.status === "pending" || s.status === "rejected" || s.status === "unpublished") {
       actions.push(`<button class="btn-primary" data-sub-action="approve" data-id="${esc(s.id)}">承認して公開</button>`);
     }
@@ -130,7 +144,10 @@
     const action = btn.dataset.subAction;
     if (!id || !action) return;
 
-    if (action === "reject") {
+    if (action === "edit_props") {
+      await editSubmissionProps(id);
+      return;
+    } else if (action === "reject") {
       const reason = window.prompt("却下理由（投稿者に通知されます）", "") || "";
       if (!window.confirm("却下します。よろしいですか？")) return;
       await postJson("/api/admin/submission_action.php", { id, action, reason });
@@ -143,6 +160,53 @@
       await postJson("/api/admin/submission_action.php", { id, action });
     }
     await loadSubs();
+  }
+
+  async function editSubmissionProps(id) {
+    const s = state.subMap.get(String(id));
+    if (!s) return;
+
+    const book_abbr = window.prompt("書略号（例: Mat）", s.book || "");
+    if (book_abbr === null) return;
+    const chapterRaw = window.prompt("章（数値）", String(s.chapter || ""));
+    if (chapterRaw === null) return;
+    const verse = window.prompt("節（例: 12 / 1-2）", s.verse || "");
+    if (verse === null) return;
+    const citation_ja = window.prompt("引用表記", s.citationJa || "");
+    if (citation_ja === null) return;
+    const verse_text = window.prompt("御言本文", s.verseText || "");
+    if (verse_text === null) return;
+    const size = window.prompt("サイズ（postcard / businesscard / square）", s.size || "");
+    if (size === null) return;
+    const orientation = window.prompt("向き（landscape / portrait / square）", s.orientation || "");
+    if (orientation === null) return;
+    const tags = window.prompt("タグ（カンマ区切り）", (s.tags || []).join(", "));
+    if (tags === null) return;
+
+    const chapter = Number(chapterRaw);
+    if (!Number.isInteger(chapter) || chapter < 1) {
+      alert("章は 1 以上の整数で入力してください。");
+      return;
+    }
+
+    const ok = window.confirm("プロパティを保存します。よろしいですか？");
+    if (!ok) return;
+
+    const res = await postJson("/api/admin/submission_update.php", {
+      id,
+      book_abbr: String(book_abbr).trim(),
+      chapter,
+      verse: String(verse).trim(),
+      verse_text: String(verse_text).trim(),
+      citation_ja: String(citation_ja).trim(),
+      size: String(size).trim(),
+      orientation: String(orientation).trim(),
+      tags: String(tags).trim(),
+    });
+    if (res?.ok) {
+      alert("プロパティを更新しました。");
+      await loadSubs();
+    }
   }
 
   async function uploadRevision(id) {

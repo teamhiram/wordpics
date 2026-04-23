@@ -593,11 +593,7 @@
     const n = store.pics.length;
     const sizes = new Set(store.pics.map((p) => p.size));
     const books = new Set(store.pics.map((p) => p.book));
-    el.innerHTML = [
-      `<span class="pill">${n}枚</span>`,
-      `<span class="pill">${sizes.size}サイズ</span>`,
-      `<span class="pill">${books.size}の書</span>`,
-    ].join("");
+    el.textContent = `現在${n}枚｜${books.size}の書から｜${sizes.size}サイズ`;
   }
 
   // ========== Modal ==========

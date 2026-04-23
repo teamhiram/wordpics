@@ -54,7 +54,21 @@ $items = array_map(function ($r) {
     ];
 }, $rows);
 
-$pending = (int)$pdo->query("SELECT COUNT(*) FROM submissions WHERE status = 'pending'")->fetchColumn();
+$statusRows = $pdo->query("SELECT status, COUNT(*) AS c FROM submissions GROUP BY status")->fetchAll();
+$statusCounts = [
+    'pending' => 0,
+    'approved' => 0,
+    'rejected' => 0,
+    'unpublished' => 0,
+];
+foreach ($statusRows as $sr) {
+    $k = (string)($sr['status'] ?? '');
+    if (array_key_exists($k, $statusCounts)) {
+        $statusCounts[$k] = (int)($sr['c'] ?? 0);
+    }
+}
+$allCount = array_sum($statusCounts);
+$pending = $statusCounts['pending'];
 $reports = (int)$pdo->query("SELECT COUNT(*) FROM reports WHERE status = 'open'")->fetchColumn();
 
 wp_json([
@@ -62,5 +76,6 @@ wp_json([
     'counts' => [
         'pending_submissions' => $pending,
         'open_reports'        => $reports,
+        'submissions_by_status' => array_merge($statusCounts, ['all' => $allCount]),
     ],
 ]);

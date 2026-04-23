@@ -808,6 +808,7 @@ a.text-link:focus-visible {
   color: var(--text);
   padding: 12px 14px;
   background: color-mix(in srgb, #b7efc5 20%, var(--surface));
+  border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: var(--shadow-sm);
 }
@@ -909,6 +910,7 @@ button.tag-link:focus-visible {
 }
 .modal-actions {
   display: flex;
+  justify-content: flex-end;
   gap: 10px;
   flex-wrap: wrap;
   margin: 0;
